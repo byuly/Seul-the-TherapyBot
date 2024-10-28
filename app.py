@@ -36,42 +36,16 @@ Examples!:
 """
 
 def main():
-    # Prepare the DB.
     embedding_function = OpenAIEmbeddings()
     db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
 
     st.title("Seul, Your Very Own TherapyBot!")
-    st.markdown(
-            """
-            <style>
-            /* Change button hover color */
-            .stButton > button:hover {
-                background-color: #ff4c4c; /* New hover color */
-                color: white; /* Text color on hover */
-                border: 2px solid gray; /* Gray border on hover */
-            }
-
-            /* Change the outline color on input focus */
-            .stTextInput input {
-                border: 1px solid gray; /* Set default border to gray */
-            }
-
-            .stTextInput input:focus {
-                outline: 2px solid gray; /* Set outline to gray */
-                box-shadow: none; /* Remove any shadow */
-                border-color: gray; /* Change border color on focus */
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-    query_text = st.text_input("Enter your message:")
-    
+    query_text = st.text_input("Talk to me!")
+    m = st.markdown(""" <style> div.stButton > button:first-child { background-color: rgb(0, 0, 49); } </style>""", unsafe_allow_html=True)
     if st.button("Get Response"):
         if query_text:
-            # Search the DB.
             results = db.similarity_search_with_relevance_scores(query_text, k=4)
-            if len(results) == 0 or results[0][1] < 0.5:
+            if len(results) == 0 or results[0][1] < 0.5: #safeguarding hallucination
                 st.write("Unable to find matching results.")
                 return
 
@@ -80,7 +54,7 @@ def main():
             prompt = prompt_template.format(context=context_text, question=query_text)
             
             model = ChatOpenAI()
-            response_text = model.predict(prompt)
+            response_text = model.invoke(prompt)
 
             sources = [doc.metadata.get("source", None) for doc, _score in results]
             formatted_response = f"{response_text}"
