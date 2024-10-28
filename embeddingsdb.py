@@ -22,7 +22,7 @@ load_dotenv()
 openai.api_key = os.environ['OPENAI_API_KEY']
 
 CHROMA_PATH = "chroma"
-DATA_PATH = "data"
+DATA_PATH = "data/"
 
 
 def main():
@@ -38,6 +38,7 @@ def generate_data_store():
 def load_documents():
     loader = DirectoryLoader(DATA_PATH, glob="*.md")
     documents = loader.load()
+    print(f"Loaded {len(documents)} documents from {DATA_PATH}.")
     return documents
 
 
